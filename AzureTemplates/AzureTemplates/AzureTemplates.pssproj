@@ -25,11 +25,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="SimpleServer.json" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="AzureTemplates.psd1" />
     <Compile Include="AzureTemplates.psm1" />
     <Compile Include="AzureTemplates.tests.ps1" />
+    <Compile Include="AzuteTemplate.Example.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
