@@ -1,0 +1,36 @@
+﻿/*
+  Filename : AzureAdmin.css
+
+  2017-09-07 (NieGro) File created with project.
+*/
+
+body { }
+
+p.path { font-size:smaller; }
+
+a:link {
+  border-bottom:dotted 1px;
+  text-decoration:none;
+}
+
+a:visited {
+  border-bottom: dotted 1px;
+  text-decoration: none
+}
+
+div#references {
+  border: solid #000 1px;
+  font-size: smaller;
+  padding: 1em;
+  float: right;
+  width: 20%;
+}
+
+p.foot {
+  text-align: center;
+  border-top: solid #000 1px;
+  font-size: smaller;
+  padding-top: 0.3em;
+  padding-bottom: 0.2em;
+  clear: both
+}
