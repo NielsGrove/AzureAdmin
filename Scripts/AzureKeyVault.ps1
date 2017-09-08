@@ -35,10 +35,10 @@ Login-AzureRmAccount
 
 
 # Create Key Vault
-$ResourceGroup = New-AzureRmResourceGroup -Name $ResourceGroupName -Location $Location
+$AzureResourceGroup = New-AzureRmResourceGroup -Name $ResourceGroupName -Location $Location
 Set-AzureRmResourceGroup -Name $ResourceGroupName -Tag @{ Dept="MS_Description"; Environment="Resource Group for Key Vault" }
 
-$KeyVault = New-AzureRmKeyVault -VaultName $KeyVaultName -ResourceGroupName $ResourceGroupName -Location $Location `
+$AzureKeyVault = New-AzureRmKeyVault -VaultName $KeyVaultName -ResourceGroupName $ResourceGroupName -Location $Location `
   -EnabledForDiskEncryption -EnabledForDeployment -EnabledForTemplateDeployment
 
 Set-AzureRmResource -ResourceId $KeyVault.ResourceId -Tag @{ Dept='MS_Description'; Environment='Sandbox Key Vault.' }
