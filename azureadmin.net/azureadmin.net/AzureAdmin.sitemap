@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+  <siteMapNode url="~/Default.aspx" title="AzureAdmin"  description="Microsoft Azure administration (AzureAdmin.net).">
+    <siteMapNode url="~\Strategy\Default.aspx" title="AzureAdmin Strategy"  description="Microsoft Azure administrationstrategy." />
+    <siteMapNode url="~\Design\Default.aspx" title="AzureAdmin Design"  description="Microsoft Azure administration design." />
+    <siteMapNode url="~\Transition\Default.aspx" title="AzureAdmin Transition" description="Microsoft Azure administration transition." />
+    <siteMapNode url="~\Operation\Default.aspx" title="AzureAdmin Operation" description="Microsoft Azure administration operation." />
+    <siteMapNode url="~\Improvement\Default.aspx" title="AzureAdmin Improvement" description="Microsoft Azure administration improvement" />
+  </siteMapNode>
+</siteMap>
