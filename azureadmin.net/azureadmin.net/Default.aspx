@@ -3,8 +3,13 @@
 
 <asp:Content ID="DefaultTitle" ContentPlaceHolderID="PageTitle" runat="server">Azure Admin</asp:Content>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+<asp:Content ID="DefaultSynopsis" ContentPlaceHolderID="PageSynopsis" runat="server">
+  <p>Personal experiences with Microsoft Azure.</p>
 </asp:Content>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+<asp:Content ID="DefaultContent" ContentPlaceHolderID="PageContent" runat="server">
+</asp:Content>
+
+<asp:Content ID="DefaultNavigation" ContentPlaceHolderID="PageNavigation" runat="server">
+  <a href="https://azure.microsoft.com/en-us/" title="Microsoft Azure">Azure</a>
 </asp:Content>

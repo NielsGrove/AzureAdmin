@@ -2,22 +2,42 @@
 <!DOCTYPE html>
 
 <html>
+
 <head runat="server">
+  <title>AzureAdmin &ndash; <% Response.Write(SiteMap.CurrentNode.Title); %></title>
+  <%--link rel="shortcut icon" href="~/favicon.ico" type="image/x-icon" runat="server" /--%>
   <link rel="stylesheet" type="text/css" href="~\App_Themes\AzureAdmin.css" runat="server" />
-  <title></title>
-  <asp:ContentPlaceHolder ID="head" runat="server">
-  </asp:ContentPlaceHolder>
+
+  <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
 </head>
 
 <body>
-
-  <h1 class="header"><asp:ContentPlaceHolder ID="PageTitle" runat="server" /></h1>
-
   <form id="form1" runat="server">
-    <div>
-      <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
-      </asp:ContentPlaceHolder>
+    <p class="navbar">
+      <span id="About" style="float:right">
+        <a href="About.aspx" title="About the site AzureAdmin.net." runat="server">About</a>
+      </span>
+      <asp:SiteMapPath ID="SiteMapPath" runat="server" />
+    </p>
+
+    <h1 class="header"><asp:ContentPlaceHolder ID="PageTitle" runat="server" /></h1>
+
+    <div id="wrapper">
+      <div id="synopsis"><asp:ContentPlaceHolder ID="PageSynopsis" runat="server" /></div>
+
+      <div id="main"><asp:ContentPlaceHolder ID="PageContent" runat="server" /></div>
+
+      <div id="navcol"><asp:ContentPlaceHolder ID="PageNavigation" runat="server" /></div>
+
+      <p class="foot">
+        <span style="float:right"><a href="http://www.niels.grove-rasmussen.net" title="Niels Grove-Rasmussen private site">Niels Grove-Rasmussen</a></span>
+        Last update <asp:Label ID="PageTime" runat="server" />.
+        <br />
+        <!--span style="float:right"></span-->
+        Response <asp:Label ID="RequestTime" runat="server" />
+      </p>
     </div>
   </form>
 </body>
+
 </html>
