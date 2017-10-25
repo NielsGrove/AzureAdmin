@@ -9,22 +9,60 @@
 .EXAMPLE
 
 .NOTES
-  Filename  : <Filename>
+  Filename  : DelphixSqlTest.ps1
 .NOTES
-  <Date and time, ISO8601> <Author> <History>
+  2017-10-25 (Niels Grove-Rasmussen) The script file created on notes and mails.
 
 .LINK
-  Get-Help about_Comment_Based_Help
+  Delphix Documentation: Tasks for the Windows Network Administrator
+  (https://docs.delphix.com/docs/delphix-administration/sql-server-environments-and-data-sources/setting-up-and-configuring-delphix-for-sql-server/tasks-for-the-windows-network-administrator)
 .LINK
-  TechNet Library: about_Functions_Advanced
-  https://technet.microsoft.com/en-us/library/dd315326.aspx
+  Delphix Documentation: Windows Database Server Requirements
+  (https://docs.delphix.com/docs/delphix-administration/sql-server-environments-and-data-sources/setting-up-and-configuring-delphix-for-sql-server/tasks-for-the-windows-system-administrator/windows-database-server-requirements)
+.LINK
+  Delphix Documentation: Windows Users and Permissions on Database Servers
+  https://docs.delphix.com/docs/delphix-administration/sql-server-environments-and-data-sources/setting-up-and-configuring-delphix-for-sql-server/tasks-for-the-windows-system-administrator/windows-users-and-permissions-on-database-servers
+.LINK
+  Delphix Documentation: Database User Requirements for SQL Server
+  (https://docs.delphix.com/docs/delphix-administration/sql-server-environments-and-data-sources/setting-up-and-configuring-delphix-for-sql-server/tasks-for-the-sql-server-database-administrator/database-user-requirements-for-sql-server)
 #>
 
 #Requires -Version 5
 Set-StrictMode -Version Latest
 
 #Import-Module G:\Teknik\Script\Sandbox\Module.sandbox\Module.sandbox.psm1
+<#
+input:
+Target server name
+Staging server name
+Source server name
+Delphix server name
+Admin workstation name (required test execution host?)
+Source backup folder
+Target domain user (name & password)
+Staging domain user
+Source domain user
+Source SQL Login
 
+Custom object for each test
+============================
+Name
+Expectation
+Measure
+Start Time
+Finish Time
+----------------------------
+
+Principles:
+One test - one function
+Each funk with specific reference to Delphix documentation
+
+Ideas:
+Custom Out-Html?
+  Color coding where Expectation != Measure
+  Status header: inputs, error count, test count
+File name: DelphixSqlTest.(<host name>).<time stamp : ymd hm>.<file type>
+#>
 
 #region <name>
 
