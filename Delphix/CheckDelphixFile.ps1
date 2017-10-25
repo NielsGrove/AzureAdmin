@@ -67,13 +67,13 @@ End {
 ###  Invoke  ###
 [System.IO.FileInfo]$DelphixFolder = 'C:\NgrAdmin\DML\Delphix'
 
-<#
-[System.IO.FileInfo]$DelphixFile = $DelphixFolder.FullName + '\Delphix_5.1.8.0_2017-08-09-16-07_HWv8_Demo.ova'
-[string]$DelphixMD5 = '5d18a7e57758a875d24b3b4215a91dc3'
+#<#
+[System.IO.FileInfo]$DelphixFile = $DelphixFolder.FullName + '\Delphix_5.1.8.1_2017-09-13-05-40_HWv8_Demo.ova'
+[string]$DelphixMD5 = 'b91499bdd24461905aa89642d8b0b074'
 #>
-
+<#
 [System.IO.FileInfo]$DelphixFile = $DelphixFolder.FullName + '\delphix_5.1.8.1_2017-09-13-05-40.upgrade.tar.gz'
 [string]$DelphixMD5 = 'f63022917bc76bcaaca2fbeccc652512'
+#>
 
 Test-DelphixFile -DelphixFile $DelphixFile -DelphixMD5 $DelphixMD5 -Verbose #-Debug
-
