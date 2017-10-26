@@ -14,6 +14,9 @@
   2017-10-25 (Niels Grove-Rasmussen) The script file created on notes and mails.
 
 .LINK
+  Delphix Documentation: Overview of Requirements for SQL Server Environments
+  (https://docs.delphix.com/docs/delphix-administration/sql-server-environments-and-data-sources/setting-up-and-configuring-delphix-for-sql-server/overview-of-requirements-for-sql-server-environments)
+.LINK
   Delphix Documentation: Tasks for the Windows Network Administrator
   (https://docs.delphix.com/docs/delphix-administration/sql-server-environments-and-data-sources/setting-up-and-configuring-delphix-for-sql-server/tasks-for-the-windows-network-administrator)
 .LINK
@@ -32,18 +35,6 @@ Set-StrictMode -Version Latest
 
 #Import-Module G:\Teknik\Script\Sandbox\Module.sandbox\Module.sandbox.psm1
 <#
-input:
-Target server name
-Staging server name
-Source server name
-Delphix server name
-Admin workstation name (required test execution host?)
-Source backup folder
-Target domain user (name & password)
-Staging domain user
-Source domain user
-Source SQL Login
-
 Custom object for each test
 ============================
 Name
@@ -64,7 +55,7 @@ Custom Out-Html?
 File name: DelphixSqlTest.(<host name>).<time stamp : ymd hm>.<file type>
 #>
 
-#region <name>
+#region Delphix Target server
 
 function Verb-Noun {
 <#
@@ -103,7 +94,102 @@ End {
 }
 }  # Verb-Noun()
 
-#endregion <name>
+#endregion Delphix Target server
+
+
+#region Delphix Staging server
+
+#endregion Delphix Staging server
+
+
+#region Delphix Source server
+
+#endregion Delphix Source server
+
+
+#region Delphix Engine server
+
+#endregion Delphix Engine server
+
+
+#region Delphix Admin workstation
+
+#endregion Delphix Admin workstation
+
+
+#region Delphix SQL test
+
+function Test-DelphixSql {
+  <#
+  .DESCRIPTION
+    <Description of the function>
+  .PARAMETER TargetServerName
+    <parameter description>
+  .PARAMETER StagingServerName
+    <parameter description>
+  .PARAMETER SourceServerName
+    <parameter description>
+  .PARAMETER DelphixServerName
+    <parameter description>
+  .PARAMETER AdminWorkstationName
+    <parameter description>
+  .PARAMETER SourceBackupFolder
+    <parameter description>
+  
+  .NOTES
+    input candidates:
+    Target domain user (name & password)
+    Staging domain user
+    Source domain user
+    Source SQL Login
+
+  .OUTPUTS
+    (none)
+  .RETURNVALUE
+    (none)
+  .LINK
+    <link to external reference or documentation>
+  .NOTES
+    2017-10-26 (Niels Grove--Rasmussen) Function created with initial parameters on notes
+  #>
+  [CmdletBinding()]
+  [OutputType([void])]
+  Param(
+    [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+    [string]$TargetServerName,
+
+    [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+    [string]$StagingServerName,
+
+    [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+    [string]$SourceServerName,
+
+    [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+    [string]$DelphixServerName,
+
+    [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+    [string]$AdminWorkstationName,
+
+    [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+    [System.IO.FileInfo]$SourceBackupFolder,
+  )
+  
+  Begin {
+    $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
+    "{0:s}Z  ::  Verb-Noun( '$param1' )" -f [System.DateTime]::UtcNow | Write-Verbose
+  }
+  
+  Process {
+  }
+  
+  End {
+    $mywatch.Stop()
+    [string]$Message = "<function> finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
+    "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
+  }
+}  # Test-DelphixSql()
+  
+#endregion Delphix SQL test
 
 
 ###  INVOKE  ###
