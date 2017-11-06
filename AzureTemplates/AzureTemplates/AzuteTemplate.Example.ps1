@@ -30,7 +30,27 @@ Set-StrictMode -Version Latest
 Import-Module AzuteTemplates.psm1
 
 
-#region <name>
+#region SimpleStorage
+
+Set-Location -LiteralPath 'M:\GitHub\AzureAdmin\AzureTemplates' -Verbose
+[string]$ResourceGroupName = 'SimpleServer'
+[string]$Location = 'West Europe'
+
+Login-AzureRmAccount
+
+New-AzureRmResourceGroup -Name $ResourceGroupName -Location $Location
+
+$AzureRmResourceGrp = Get-AzureRmResourceGroup -Name $ResourceGroupName
+Set-AzureRmResourceGroup -Tag @{msDescription="Simple Server"} -ResourceId $ResourceGrp.ResourceId -Force
+
+$Tags = (Get-AzureRmResourceGroup -Name $ResourceGroupName).Tags
+$Tags += @{msDescription = 'Simple Server.'}  #Does Not Work
+New-AzureRmTag -Name 'msDescription' -Value 'Simple Server'  #Does Not Work
+
+New-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile SimpleServer.json -storageNamePrefix simple
+
+Remove-AzureRmResourceGroup -Name $ResourceGroupName
+
 
 function Verb-Noun {
 <#
@@ -69,7 +89,7 @@ End {
 }
 }  # Verb-Noun()
 
-#endregion <name>
+#endregion SimpleStorage
 
 
 ###  INVOKE  ###
