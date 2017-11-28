@@ -1,5 +1,5 @@
 # Delphix SQL Server setup
-This PowerShell module will configure and check a server hosting SQL Server Database Engine for a Delphix Staging or Target server.
+This PowerShell module will configure and check a server hosting SQL Server Database Engine for a Delphix Staging, Target or Source server.
 Delphix has documented the tasks and activities in their standard documentation where an overview is in the document "[Setting Up and Configuring Delphix for SQL Server](https://docs.delphix.com/docs/delphix-administration/sql-server-environments-and-data-sources/setting-up-and-configuring-delphix-for-sql-server)".
 
 ## DSC in general
