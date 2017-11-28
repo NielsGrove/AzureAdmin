@@ -3,7 +3,7 @@
   Change Delhix disk from growable to preallocated.
 
 .NOTES
-  2017-09-27 (NGR) Script file created when importing Delphix vm.
+  2017-09-27 (NGR) Script file created when importing Delphix vm - DOES NOT WORK.
 #>
 
 Set-Location -LiteralPath 'C:\Program Files (x86)\VMware\VMware Workstation'
