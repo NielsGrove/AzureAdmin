@@ -27,7 +27,7 @@
 #Requires -Version 4
 Set-StrictMode -Version Latest
 
-Import-Module AzuteTemplates.psm1
+Import-Module $PSScriptRoot\AzuteTemplates.psm1
 
 
 #region SimpleStorage
@@ -96,3 +96,5 @@ End {
 
 Clear-Host
 #<function call> -Verbose -Debug
+
+Remove-Module AzureTemplates
