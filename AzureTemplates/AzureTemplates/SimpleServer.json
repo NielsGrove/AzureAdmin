@@ -42,20 +42,22 @@
     "virtualNetworkName": "MyVNET",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
     "storageName": "[concat('simpleStorage', uniqueString(resourceGroup().id))]",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks','myVNet')]"
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks','myVNet')]",
+    "tagValues":  "[parameters('system')]"
     //"subnetRef": "[concat(variables('vnetID'),'/subnets/mySubnet')]"
   },
   "resources": [
     {
       "name": "[variables('storageName')]",
-      "type": "Microsoft.Storage/storageAccounts",
+      //"type": "Microsoft.Storage/storageAccounts",
+      "type": "Microsoft.Datafactory/factories/datasets",
       "apiVersion": "2016-01-01",
       "sku": {
         "name": "Standard_LRS"
       },
       "kind": "Storage",
       "location": "West Europe",
-      "tags": "[parameters('tagValues')]",
+      "tags": "[variables('tagValues')]",
       "properties": {}
     },
     {
@@ -119,7 +121,7 @@
         "hardwareProfile": { "vmSize": "Standard_DS1" },
         "osProfile": {
           "computerName": "myVM",
-          "adminUsername": "[parameters('adminUsername')]",
+          "adminUsername": "[parameters('adminName')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
