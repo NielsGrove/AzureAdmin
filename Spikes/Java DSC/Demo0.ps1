@@ -1,6 +1,9 @@
 <#
-Desired State Configuration Quick Start
-(https://docs.microsoft.com/en-us/powershell/dsc/quickstart)
+.DESCRIPTION
+  Desired State Configuration Quick Start
+  (https://docs.microsoft.com/en-us/powershell/dsc/quickstart)
+
+  Execute as Administrator
 #>
 
 Set-Location 'C:\NgrAdmin\GitHub\AzureAdmin\Spikes\Java DSC'
