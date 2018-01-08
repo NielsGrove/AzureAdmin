@@ -1,18 +1,23 @@
 <#
+.SYNOPSIS
+  Install Java JRE (Server) on Windows Server.
 .DESCRIPTION
-  Install Java JRE on Windows Server
+  Install Java JRE (Server) on Windows Server.
+.PARAMETER <ParameterName>
+  (none)
 .EXAMPLE
-
+  Start-DscConfiguration -Path '.\JavaDscConfiguration' -Wait -Force -Verbose
+.NOTES
+  2018, Niels Grove-Rasmussen
 #>
 
 Configuration JavaDscConfiguration {
-Param(
-    [Parameter(Mandatory=$true)]
-    [string]$ComputerName
-)
+Param()
 
-    Node $ComputerName {
-        # Test if 7-zip is installed
+    Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
+
+    Node 'localhost' {
+        # Test if 7zip is installed
         #   (https://docs.microsoft.com/en-us/powershell/dsc/fileresource)
         File 7zip {
             DestinationPath = "$($env:ProgramFiles)\7-Zip\7z.exe"
@@ -23,26 +28,26 @@ Param(
         File JavaTarGz {
             Ensure = 'Present'
             Type = 'File'
-            SourcePath = 'C:\NgrAdmin\DML\Java 8\server-jre-8u152-windows-x64.tar.gz'
-            DestinationPath = 'C:\temp\'
-            #DestinationPath = $ConfigurationData.AllNodes.DestPath
+            SourcePath = $Node.JavaDmlFolder + $Node.JavaGzFile
+            DestinationPath = $Node.DestinationPath
             Force = $true
             MatchSource = $true
             DependsOn = '[File]7zip'
         }
 
-        # Unzip Java JRE (.tar.gz)
+        # Unzip Java JRE (.gz)
         #   (https://docs.microsoft.com/en-us/powershell/dsc/scriptresource)
         Script JavaUnzip {
             SetScript = {
-                ':: JavaUnzip - SetScript' | Write-Verbose
-                [string]$JavaZipFile = 'C:\temp\server-jre-8u152-windows-x64.tar.gz'
-                [string]$DestPath = 'C:\temp\'
+                [string]$JavaZipFile = $using:Node.DestinationPath + $using:Node.JavaGzFile
+							  "::  Java gz-file = '$JavaZipFile'" | Write-Verbose
+                [string]$DestPath = $using:Node.DestinationPath
+                "::  Destination Path = '$DestPath'" | Write-Verbose
                 [string]$ArgList = "x $JavaZipFile -o$DestPath"
                 Start-Process "$($env:ProgramFiles)\7-Zip\7z.exe" -ArgumentList $ArgList -Wait
             }
             TestScript = {
-                Test-Path 'C:\temp\jdk1.8.0_152\README.html'
+                Test-Path $using:Node.DestinationPath + 'jdk1.8.0_152\README.html'
             }
             GetScript = { '...' }
             DependsOn = '[File]JavaTarGz'
@@ -50,12 +55,12 @@ Param(
 
         Script RemoveGz {
             SetScript = {
-                [string]$JavaZipFile = 'C:\temp\server-jre-8u152-windows-x64.tar.gz'
-                Remove-Item -LiteralPath $JavaZipFile
+                [string]$JavaGzFile = $using:Node.DestinationPath + 'server-jre-8u152-windows-x64.tar.gz'
+                Remove-Item -LiteralPath $JavaGzFile
             }
             TestScript = {
-                [string]$JavaZipFile = 'C:\temp\server-jre-8u152-windows-x64.tar.gz'
-                -not (Test-Path -LiteralPath $JavaZipFile)
+                [string]$JavaGzFile = $using:Node.DestinationPath + '\server-jre-8u152-windows-x64.tar.gz'
+                -not (Test-Path -LiteralPath $JavaGzFile)
             }
             GetScript = { '...' }
             DependsOn = '[Script]JavaUnZip'
@@ -64,8 +69,8 @@ Param(
         # UnTar Java JRE (.tar)
         Script JavaUnTar {
             SetScript = {
-                [string]$JavaTarFile = 'C:\temp\server-jre-8u152-windows-x64.tar'
-                [string]$DestPath = 'C:\temp\'
+                [string]$JavaTarFile = $using:Node.DestinationPath + '\server-jre-8u152-windows-x64.tar'
+                [string]$DestPath = $using:Node.DestinationPath
                 [string]$ArgList = "x $JavaTarFile -o$DestPath"
                 Start-Process "$($env:ProgramFiles)\7-Zip\7z.exe" -ArgumentList $ArgList -Wait
             }
@@ -88,10 +93,7 @@ Param(
             GetScript = { '...' }
             DependsOn = '[Script]JavaUnTar'
         }
-
-        # Set javapath
     }
 }
 
-JavaDscConfiguration -ComputerName 'localhost'
-#JavaDscConfiguration -ConfigurationData <config file name>
+JavaDscConfiguration -ConfigurationData '.\Java.Configuration.psd1'

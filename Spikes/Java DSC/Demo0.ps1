@@ -15,9 +15,14 @@ Set-Location 'C:\NgrAdmin\GitHub\AzureAdmin\Spikes\Java DSC'
 # Apply configuration (https://docs.microsoft.com/en-us/powershell/module/psdesiredstateconfiguration/start-dscconfiguration)
 Start-DscConfiguration -Path '.\JavaDscConfiguration' -Wait -Force -Verbose
 
+
 Update-DscConfiguration
 
 # Test configuration
 Get-DscConfigurationStatus 
 
 Stop-DscConfiguration
+
+
+
+Get-DscResource -Module *java
