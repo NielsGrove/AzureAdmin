@@ -47,7 +47,7 @@ Param()
                 Start-Process "$($env:ProgramFiles)\7-Zip\7z.exe" -ArgumentList $ArgList -Wait
             }
             TestScript = {
-                Test-Path $using:Node.DestinationPath + 'jdk1.8.0_152\README.html'
+                Test-Path "$($using:Node.DestinationPath)jdk1.8.0_152\README.html"
             }
             GetScript = { '...' }
             DependsOn = '[File]JavaTarGz'
