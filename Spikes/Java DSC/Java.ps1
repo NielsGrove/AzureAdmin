@@ -40,9 +40,7 @@ Param()
         Script JavaUnzip {
             SetScript = {
                 [string]$JavaZipFile = $using:Node.DestinationPath + $using:Node.JavaGzFile
-							  "::  Java gz-file = '$JavaZipFile'" | Write-Verbose
                 [string]$DestPath = $using:Node.DestinationPath
-                "::  Destination Path = '$DestPath'" | Write-Verbose
                 [string]$ArgList = "x $JavaZipFile -o$DestPath"
                 Start-Process "$($env:ProgramFiles)\7-Zip\7z.exe" -ArgumentList $ArgList -Wait
             }
@@ -55,11 +53,11 @@ Param()
 
         Script RemoveGz {
             SetScript = {
-                [string]$JavaGzFile = $using:Node.DestinationPath + 'server-jre-8u152-windows-x64.tar.gz'
+                [string]$JavaGzFile = $using:Node.DestinationPath + $using:Node.JavaGzFile
                 Remove-Item -LiteralPath $JavaGzFile
             }
             TestScript = {
-                [string]$JavaGzFile = $using:Node.DestinationPath + '\server-jre-8u152-windows-x64.tar.gz'
+                [string]$JavaGzFile = $using:Node.DestinationPath + $using:Node.JavaGzFile
                 -not (Test-Path -LiteralPath $JavaGzFile)
             }
             GetScript = { '...' }
@@ -69,13 +67,13 @@ Param()
         # UnTar Java JRE (.tar)
         Script JavaUnTar {
             SetScript = {
-                [string]$JavaTarFile = $using:Node.DestinationPath + '\server-jre-8u152-windows-x64.tar'
+                [string]$JavaTarFile = $using:Node.DestinationPath + 'server-jre-8u152-windows-x64.tar'
                 [string]$DestPath = $using:Node.DestinationPath
                 [string]$ArgList = "x $JavaTarFile -o$DestPath"
                 Start-Process "$($env:ProgramFiles)\7-Zip\7z.exe" -ArgumentList $ArgList -Wait
             }
             TestScript = {
-                Test-Path 'C:\temp\jdk1.8.0_152'
+                Test-Path "$($using:Node.DestinationPath)jdk1.8.0_152"
             }
             GetScript = { '...' }
             DependsOn = '[Script]JavaUnzip'
@@ -83,11 +81,11 @@ Param()
 
         Script RemoveTar {
             SetScript = {
-                [string]$JavaTarFile = 'C:\temp\server-jre-8u152-windows-x64.tar'
+                [string]$JavaTarFile = $using:Node.DestinationPath + 'server-jre-8u152-windows-x64.tar'
                 Remove-Item -LiteralPath $JavaTarFile
             }
             TestScript = {
-                [string]$JavaTarFile = 'C:\temp\server-jre-8u152-windows-x64.tar'
+                [string]$JavaTarFile = $using:Node.DestinationPath + 'server-jre-8u152-windows-x64.tar'
                 -not (Test-Path -LiteralPath $JavaTarFile)
             }
             GetScript = { '...' }
