@@ -5,10 +5,14 @@
   2018, Niels Grove-Rasmussen
 #>
 
-Set-Location 'C:\NgrAdmin\GitHub\AzureAdmin\Spikes\Zip Install DSC'
 
+<# Pscx (https://github.com/Pscx/Pscx)
+  Get module from PowerShell Gallery to custom path
+  and import with prefix to noun to avoid name collision with existing alias and cmdlets, e.g. gcb, Expand-Archive
 
-# Pscx (https://github.com/Pscx/Pscx)
+  PSCX conflicts with multiple commands in version 5.1
+  (https://github.com/Pscx/Pscx/issues/23)
+#>
 Get-Module -ListAvailable
 Get-Module -Name Pscx
 Get-Command -Module 'Pscx'
@@ -22,8 +26,10 @@ Remove-Item -LiteralPath 'C:\temp\Pscx' -Force
 #Start-Process 'PowerShell' -ArgumentList "Remove-Item -LiteralPath 'C:\temp\Pscx' -Force" -NoNewWindow -Verb RunAs
 
 
+Set-Location 'C:\NgrAdmin\GitHub\AzureAdmin\Spikes\Zip Install DSC'
+
 # Compile to MOF file
-. .\ZipInstall.ps1
+. .\ZipInstallDsc.ps1
 
 # Apply configuration
-Start-DscConfiguration -Path '.\ZipInstallConfiguration' -Wait -Force -Verbose
+Start-DscConfiguration -Path '.\ZipInstallDsc' -Wait -Force -Verbose

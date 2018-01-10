@@ -5,6 +5,7 @@
 		},
 		@{
 			NodeName = 'localhost'
+			PSDscAllowDomainUser = $true
 			DestinationPath = 'C:\temp\'
 		}
 	);
