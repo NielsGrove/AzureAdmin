@@ -57,6 +57,50 @@ End {
 #endregion NodeDefition
 
 
+#region InstallSet
+
+function Get-InstallSet {
+<#
+.DESCRIPTION
+  Get installation set from DSL over HTTP.
+.PARAMETER SourceFile
+  Source file name with full path
+.PARAMETER DestinationFile
+	Destination file name with full local path
+.LINK
+  <link to external reference or documentation>
+.NOTES
+  2018-01-10
+#>
+[CmdletBinding()]
+[OutputType([void])]
+Param(
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$false,HelpMessage='Take your time to write a good help message...')]
+  [string]$SourceFile,
+
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$false,HelpMessage='Take your time to write a good help message...')]
+  [string]$DestinationFile
+)
+
+Begin {
+  $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
+  "{0:s}Z  ::  Get-InstallationSet()" -f [System.DateTime]::UtcNow | Write-Verbose
+}
+
+Process {
+	#Invoke-WebRequest -Uri 'http://dsl/...' -OutFile 'C:\temp\...'
+
+	Start-BitsTransfer -Source $SourceFile -Destination $DestinationFile
+}
+
+End {
+  $mywatch.Stop()
+  [string]$Message = "Get-InstallationSet finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
+  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
+}
+}  # Get-InstallSet()
+
+#endregion InstallSet
 
 
 #region Metadata

@@ -17,15 +17,21 @@ Configuration JavaDsc {
 [CmdletBinding()]
 Param(
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$MetadataPath
+  [string]$ZipFileName
 )
 
 	Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
 
 	Node 'localhost' {
+		<# Script DmlFolder {
+			SetScript = {}
+			TestScript = {}
+			GetScript = {}
+		} #>
+
 		Archive InstallSetUnzip {
 			Ensure = 'Present'
-			Path = $Node.DmlFolder + $Node.ZipFile
+			Path = $Node.DmlFolder + $ZipFileName
 			Destination = $Node.DestinationPath
 			Force = $true
 		}
