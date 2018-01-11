@@ -15,7 +15,10 @@
 
 Configuration JavaDsc {
 [CmdletBinding()]
-Param()
+Param(
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$MetadataPath
+)
 
 	Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
 
