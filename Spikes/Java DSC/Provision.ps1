@@ -19,9 +19,7 @@ Import-Module -Name "$PSScriptRoot\Provision.psm1" -Verbose -Debug
 
 [string]$InstallSetPath = 'http://dsl/content/repositories/Installers/Java/'  # -> json
 [string]$InstallSetName = 'jdk1.8.0_112-CE.zip'  # -> json
-[string]$PackageFolder = 'C:\temp\jdk180-112.1'  # -> json
-[string]$ZipFileName = 'jdk1.8.0_112-CE.zip'
-[string]$InstallSetDestination = 'C:\temp\jdk180-112.1\jdk1.8.0_112-CE.zip'  # -> json file
+[string]$PackageFolder = 'C:\temp\jdk180-112.1\'  # -> json
 [string]$MetadataPath = 'F:\PFA_CMDB' # -> json-file
 
 
@@ -60,7 +58,9 @@ Process {
 
     # Copy file from DSL to local folder
     [string]$InstallSetSource = $InstallSetPath + $InstallSetName
-    "Install Set = '$InstallSetSource'" | Write-Verbose
+    "Install Set (source) = '$InstallSetSource'" | Write-Verbose
+    [string]$InstallSetDestination = $PackageFolder + $InstallSetName
+    "Install Set (destination) = '$InstallSetDestination'" | Write-Verbose
     Get-InstallSet -SourceFile $InstallSetSource -DestinationFile $InstallSetDestination
 
     Set-Location $PSScriptRoot
@@ -68,7 +68,7 @@ Process {
     # Compile to MOF file
     [string]$DscFileName = "$PSScriptRoot\$PackageName.ps1"
     "DSC File = '$DscFileName'" | Write-Verbose
-    . .\jdk180-112.1.ps1 -ZipFileName $ZipFileName
+    . .\jdk180-112.1.ps1 -ZipFileName $InstallSetName
 
     # Apply DSC-configuration
     try {

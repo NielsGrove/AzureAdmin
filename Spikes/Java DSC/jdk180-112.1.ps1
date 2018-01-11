@@ -31,7 +31,7 @@ Param(
 
 		Archive InstallSetUnzip {
 			Ensure = 'Present'
-			Path = $Node.DmlFolder + $ZipFileName
+			Path = $Node.DmlFolder + $using:ZipFileName
 			Destination = $Node.DestinationPath
 			Force = $true
 		}
