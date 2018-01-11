@@ -14,6 +14,7 @@
 #>
 
 Configuration JavaDsc {
+[CmdletBinding()]
 Param()
 
 	Import-DscResource –ModuleName 'PSDesiredStateConfiguration'

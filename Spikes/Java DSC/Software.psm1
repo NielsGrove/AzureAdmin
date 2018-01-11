@@ -28,7 +28,7 @@ function Get-NodeDefinition {
 [OutputType([void])]
 Param(
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$DefninitionFile
+  [string]$DefinitionFile
 )
 
 Begin {
@@ -37,7 +37,14 @@ Begin {
 }
 
 Process {
-	$NodeDefinition = (Get-Content $DefninitionFile) -join "`n" | ConvertFrom-Json
+	return $null
+
+	if (Test-Path -LiteralPath '$DefinitionFile') {
+		$NodeDefinition = (Get-Content $DefinitionFile) -join "`n" | ConvertFrom-Json
+	}
+	else {
+		throw ("{0:s}Z  The package definition file '$DefinitionFile' does not exist." -f [System.DateTime]::UtcNow)
+	}
 }
 
 End {

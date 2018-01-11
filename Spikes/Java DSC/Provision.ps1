@@ -12,7 +12,17 @@
 #Requires -Version 5
 Set-StrictMode -Version Latest
 
-Import-Module -Name "$PSScriptRoot\Provision.psm1" -Verbose
+Import-Module -Name "$PSScriptRoot\Provision.psm1" -Verbose -Debug
+#Import-Module -Name ".\Provision.psm1" -Verbose
+
+
+[string]$PackageName = 'jdk180-112.1'  # -> script parameter
+
+[string]$InstallSetSource = 'http://dsl/content/repositories/Installers/Java/jdk1.8.0_112-CE.zip'  # -> json file
+[string]$PackageFolder = 'C:\temp\jdk180-112.1'  # -> json
+[string]$InstallSetDestination = 'C:\temp\jdk180-112.1\jdk1.8.0_112-CE.zip'  # -> json file
+[string]$MetadataPath = 'F:\PFA_CMDB' # -> json-file
+
 
 function Invoke-Provision {
 <#
@@ -34,29 +44,27 @@ Param(
 
 Begin {
   $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
-  "{0:s}Z  ::  Invoke-Provision( 'PackageName' )" -f [System.DateTime]::UtcNow | Write-Verbose
+  "{0:s}Z  ::  Invoke-Provision( '$PackageName' )" -f [System.DateTime]::UtcNow | Write-Verbose
 }
 
 Process {
     # ToDo : Parse JSON-file given in parameter NodeDef
-    $NodeDefinitionFileName = "$PackageName.json"
-    Get-NodeDefinition -DefinitionFile $NodeDefinitionFileName
+    $NodeDefinitionFileName = "$PSScriptRoot\$PackageName.json"
+    try {
+      $NodeDefinition = Get-NodeDefinition -DefinitionFile $NodeDefinitionFileName
+    }
+    catch {
+      throw ("{0:s}Z  Could not get defition file to the package '$NodeDefinitionFileName'." -f [System.DateTime]::UtcNow)
+    }
 
     # Copy file from DSL to local folder
-    [string]$InstallSetSource = 'http://dsl/content/repositories/Installers/Java/jdk1.8.0_112-CE.zip'  # -> json file
-    [string]$InstallSetDestination = 'C:\temp\jdk180-112.1\jdk1.8.0_112-CE.zip'  # -> json file
     Get-InstallSet -SourceFile $InstallSetSource -DestinationFile $InstallSetDestination
 
-    if ($PSScriptRoot) {
-      Set-Location $PSScriptRoot
-    } else {
-      Set-Location 'C:\NgrAdmin\GitHub\AzureAdmin\Spikes\Java DSC'
-    }
-    Get-Location | Write-Verbose
+    Set-Location $PSScriptRoot
 
     # Compile to MOF file
-    [string]$DscFile = ".\$PackageName.ps1"
-    "DSC File = '$DscFile'" | Write-Verbose
+    [string]$DscFileName = "$PSScriptRoot\$PackageName.ps1"
+    "DSC File = '$DscFileName'" | Write-Verbose
     . .\jdk180-112.1.ps1
 
     # Apply DSC-configuration
@@ -64,13 +72,13 @@ Process {
       Start-DscConfiguration -Path '.\JavaDsc' -Wait -Force -Verbose $false
     }
     catch {
-      "{0:s}  DSC configuration failed. Check DSC log." | Write-Error
+      throw ("{0:s}Z  DSC configuration failed. DSC file = '$DscFileName'. Check DSC log." -f [System.DateTime]::UtcNow)
     }
 
     # Delete local Install Set ZIP-file - delete in DSC fails as the file is in use...
+    # ToDo : Test for file in use
     Start-Sleep -Seconds 5
     Remove-Item -LiteralPath $InstallSetDestination
-
 
     # Create local metadata
     Set-Metadata -LocalPath '(TBD)'
@@ -84,7 +92,7 @@ End {
 }  # Invoke-Provision()
 
 
-[string]$PackageName = 'jdk180-112.1'
-[string]$MetadataPath = 'F:\PFA_CMDB' # -> json-file
+###  INVOKE  ###
+Invoke-Provision -PackageName $PackageName -Verbose #-Debug
 
-Invoke-Provision -PackageName $PackageName
+Remove-Module -Name Provision -Verbose -Debug
