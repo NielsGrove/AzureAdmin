@@ -23,6 +23,32 @@ Import-Module -Name "$PSScriptRoot\Provision.psm1" -Verbose -Debug
 [string]$MetadataPath = 'F:\PFA_CMDB' # -> json-file
 
 
+Configuration InstallDsc {
+[CmdletBinding()]
+Param(
+  <#[Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$ZipFileName#>
+)
+
+	Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
+
+	Node 'localhost' {
+		<# Script DmlFolder {
+			SetScript = {}
+			TestScript = {}
+			GetScript = {}
+		} #>
+
+		Archive InstallSetUnzip {
+			Ensure = 'Present'
+			Path = $InstallSetPath + $InstallSetName
+			Destination = $PackageFolder
+			Force = $true
+		}
+	}
+}  # InstallDsc
+
+
 function Invoke-Provision {
 <#
 .DESCRIPTION
@@ -66,16 +92,19 @@ Process {
     Set-Location $PSScriptRoot
 
     # Compile to MOF file
-    [string]$DscFileName = "$PSScriptRoot\$PackageName.ps1"
-    "DSC File = '$DscFileName'" | Write-Verbose
-    . .\jdk180-112.1.ps1 -ZipFileName $InstallSetName
+    #[string]$DscFileName = "$PSScriptRoot\$PackageName.ps1"
+    #"DSC File = '$DscFileName'" | Write-Verbose
+    #. .\jdk180-112.1.ps1 #-ZipFileName $InstallSetName
+    InstallDsc #-ConfigurationData Get-DscConfigurationData
+
 
     # Apply DSC-configuration
     try {
-      Start-DscConfiguration -Path '.\JavaDsc' -Wait -Force -Verbose $false
+      #Start-DscConfiguration -Path '.\JavaDsc' -Wait -Force -Verbose $false
+      Start-DscConfiguration -Path '.\InstallDsc' -Wait -Force -Verbose $false
     }
     catch {
-      throw ("{0:s}Z  DSC configuration failed. DSC file = '$DscFileName'. Check DSC log." -f [System.DateTime]::UtcNow)
+      throw ("{0:s}Z  DSC configuration failed. DSC MOF file = '.\InstallDsc'. Check DSC log." -f [System.DateTime]::UtcNow)
     }
 
     # Delete local Install Set ZIP-file - delete in DSC fails as the file is in use...

@@ -103,6 +103,65 @@ End {
 #endregion InstallSet
 
 
+#region Configuration
+
+function Get-DscConfigurationData {
+<#
+.DESCRIPTION
+  <Description of the function>
+.PARAMETER <Name>
+  <parameter description>
+.OUTPUTS
+  (none)
+.RETURNVALUE
+  (none)
+.LINK
+  <link to external reference or documentation>
+.NOTES
+  <timestamp> <version>  <initials> <version changes and description>
+#>
+[CmdletBinding()]
+[OutputType([void])]
+Param(
+  <#[Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$param1#>
+)
+
+Begin {
+  $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
+  "{0:s}Z  ::  Get-DscConfigurationData()" -f [System.DateTime]::UtcNow | Write-Verbose
+}
+
+Process {
+	$ConfigurationData = 
+	@{
+    AllNodes = @(
+      @{
+			      NodeName = '*'
+			},
+			@{
+            NodeName = 'localhost'
+				    DmlFolder = 'C:\temp\jdk180-112.1\'
+            DestinationPath = 'C:\temp\'
+        }
+    );
+
+    NonNodeData = ""
+	}
+
+	return $ConfigurationData
+}
+
+End {
+  $mywatch.Stop()
+  [string]$Message = "Get-DscConfigurationData finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
+  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
+}
+}  # Get-DscConfigurationData()
+
+#endregion Configuration
+
+
 #region Metadata
 
 function Set-Metadata {
@@ -148,4 +207,4 @@ End {
 #endregion Metadata
 
 
-Export-ModuleMember -Function Get-NodeDefinition, Get-InstallSet, Set-Metadata
+Export-ModuleMember -Function Get-NodeDefinition, Get-InstallSet, Get-DscConfigurationData, Set-Metadata

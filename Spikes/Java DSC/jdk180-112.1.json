@@ -1,6 +1,7 @@
 {
   "Node": [
     {
+      "PackageFolder": "C:\\temp\\jdk180-112.1\\",
       "InstallSetName": "jdk1.8.0_112-CE.zip",
       "MetadataPath": "F:\\PFS_CMDB"
     }
