@@ -100,6 +100,43 @@ End {
 }
 }  # Get-InstallSet()
 
+function Test-FileInUse {
+<#
+.DESCRIPTION
+  <Description of the function>
+.PARAMETER <Name>
+  <parameter description>
+.OUTPUTS
+  (none)
+.RETURNVALUE
+  (none)
+.LINK
+  <link to external reference or documentation>
+.NOTES
+  <timestamp> <version>  <initials> <version changes and description>
+#>
+[CmdletBinding()]
+[OutputType([bool])]
+Param(
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$LiteralPath
+)
+
+Begin {
+  $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
+  "{0:s}Z  ::  Test-FileInUse( '$LiteralPath' )" -f [System.DateTime]::UtcNow | Write-Verbose
+}
+
+Process {
+}
+
+End {
+  $mywatch.Stop()
+  [string]$Message = "Test-FileInUse finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
+  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
+}
+}  # Test-FileInUse()
+
 #endregion InstallSet
 
 

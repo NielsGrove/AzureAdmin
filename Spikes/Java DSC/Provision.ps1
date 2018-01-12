@@ -19,7 +19,7 @@ Import-Module -Name "$PSScriptRoot\Provision.psm1" -Verbose -Debug
 
 [string]$InstallSetPath = 'http://dsl/content/repositories/Installers/Java/'  # -> json
 [string]$InstallSetName = 'jdk1.8.0_112-CE.zip'  # -> json
-[string]$PackageFolder = 'C:\temp\jdk180-112.1\'  # -> json
+[string]$TempFolder = 'C:\temp\'  # -> json
 [string]$MetadataPath = 'F:\PFA_CMDB' # -> json-file
 
 
@@ -41,8 +41,8 @@ Param(
 
 		Archive InstallSetUnzip {
 			Ensure = 'Present'
-			Path = $InstallSetPath + $InstallSetName
-			Destination = $PackageFolder
+			Path = $TempFolder + $PackageName + '\' + $InstallSetName
+			Destination = 'C:\temp'
 			Force = $true
 		}
 	}
@@ -82,28 +82,27 @@ Process {
       throw ("{0:s}Z  Could not get defition file to the package '$NodeDefinitionFileName'." -f [System.DateTime]::UtcNow)
     }
 
-    # Copy file from DSL to local folder
+    'Copy install set file from DSL to local folder...' | Write-Verbose
     [string]$InstallSetSource = $InstallSetPath + $InstallSetName
     "Install Set (source) = '$InstallSetSource'" | Write-Verbose
-    [string]$InstallSetDestination = $PackageFolder + $InstallSetName
+    if (-not (Test-Path ($TempFolder + $PackageName))) {
+      New-Item -Path $TempFolder -Name $PackageName -ItemType directory
+    }
+    [string]$InstallSetDestination = $TempFolder + $PackageName + '\' + $InstallSetName
     "Install Set (destination) = '$InstallSetDestination'" | Write-Verbose
     Get-InstallSet -SourceFile $InstallSetSource -DestinationFile $InstallSetDestination
 
     Set-Location $PSScriptRoot
 
-    # Compile to MOF file
-    #[string]$DscFileName = "$PSScriptRoot\$PackageName.ps1"
-    #"DSC File = '$DscFileName'" | Write-Verbose
-    #. .\jdk180-112.1.ps1 #-ZipFileName $InstallSetName
-    InstallDsc #-ConfigurationData Get-DscConfigurationData
+    "Compile to MOF file..." | Write-Verbose
+    $MofFile = InstallDsc
 
-
-    # Apply DSC-configuration
+    'Apply DSC-configuration...' | Write-Verbose
     try {
-      #Start-DscConfiguration -Path '.\JavaDsc' -Wait -Force -Verbose $false
-      Start-DscConfiguration -Path '.\InstallDsc' -Wait -Force -Verbose $false
+      Start-DscConfiguration -Path "$PSScriptRoot\InstallDsc" -Wait -Force -Verbose $false
     }
     catch {
+      $Error | Write-Error
       throw ("{0:s}Z  DSC configuration failed. DSC MOF file = '.\InstallDsc'. Check DSC log." -f [System.DateTime]::UtcNow)
     }
 
