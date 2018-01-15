@@ -118,7 +118,7 @@ Process {
   Remove-Item -LiteralPath ($TempFolder + $PackageName) -Recurse -Force
 
   # Create local metadata
-  Set-Metadata -MetadataPath $MetadataPath
+  Set-Metadata -PackageName $PackageName -MetadataPath $MetadataPath
 }
 
 End {
@@ -137,7 +137,9 @@ function Set-Metadata {
 <#
 .DESCRIPTION
   <Description of the function>
-.PARAMETER LocalPath
+.PARAMETER PackageName
+  Name of software package that the metadata belong to.
+.PARAMETER MetadataPath
   Local path for metadata, e.g. "F:\PFA_CMDB"
 .OUTPUTS
   (none)
@@ -148,6 +150,9 @@ function Set-Metadata {
 [OutputType([void])]
 Param(
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$PackageName,
+
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
   [string]$MetadataPath
 )
 
@@ -157,14 +162,6 @@ Begin {
 }
 
 Process {
-<# Create node metadata and write on node
-  Create folder
-	Create share
-	  (-) everyone
-		(+) Authenticated Users: Read
-	Create file
-#>
-
   'Create metadata folder...' | Write-Verbose
   if (-not (Test-Path ($MetadataPath))) {
     $NewMetadataFolder = New-Item -Path $MetadataPath -ItemType directory
@@ -176,19 +173,37 @@ Process {
   # "Create method of the Win32_Share class" (https://msdn.microsoft.com/en-us/library/aa389393.aspx)
   if (-not (Get-WmiObject Win32_Share -Filter "name='PFA_CMDB'")) {
     [string]$SharePath = $MetadataPath -replace ".$"  # Remove last '\' from path string
+    [string]$ShareName = 'PFA_CMDB'
     $Shares = [WMICLASS]'WIN32_Share'
-    $Shares.Create($SharePath, 'PFA_CMDB', 0)
+    $ShareResult = $Shares.Create($SharePath, $ShareName, 0)
+    "Share result = '$($ShareResult.ReturnValue)'" | Write-Verbose
+    if ($ShareResult.ReturnValue -eq 0) {
+      "File share '$ShareName' is created with succes (return value '0')." | Write-Verbose
+    }
+    else {
+      throw ("{0:s}Z  The file share '$ShareName' could not be created. Return value = '$($ShareResult.ReturnValue)'." -f [System.DateTime]::UtcNow)
+    }
   }
-  'Set rights on metadata share...' | Write-Verbose
+  #'Set rights on metadata share...' | Write-Verbose
+  #  ToDo ? (-) Everyone, (+) Authenticated Users
 
   'Create metadata file...' | Write-Verbose
-
+  [DateTime]$InstallDate = New-Object System.DateTime(([System.DateTime]::Today).Ticks, [DateTimeKind]::Utc)
+  [string]$Metadata = "PackageName: $PackageName; Install Date: {0:yyyy-MM-ddK}; User: $($env:USERNAME)@$($env:USERDOMAIN)" -f $InstallDate
+  [string]$MetadataFileName = "$MetadataPath$PackageName.metadata"
+  try {
+    $Metadata | Out-File -FilePath $MetadataFileName
+  }
+  catch {
+    $Error[0].ErrorDetails | Write-Error
+    throw ("{0:s}Z  Could not write metadata to file '$MetadataFileName'." -f [System.DateTime]::UtcNow)
+  }
 }
 
 End {
   $mywatch.Stop()
   [string]$Message = "Set-Metadata finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
-  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
+  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Verbose
 }
 }  # Set-Metadata()
 
@@ -201,8 +216,8 @@ Clear-Host
 [string]$TempFolder = 'C:\temp\'
 [String]$InstallPath = 'C:\temp\'
 [string]$MetadataPath = 'C:\temp\PFA_CMDB\'
-#Install-Java -TempFolder $TempFolder -InstallPath $InstallPath -MetadataPath $MetadataPath #-Verbose #-Debug
+Install-Java -TempFolder $TempFolder -InstallPath $InstallPath -MetadataPath $MetadataPath #-Verbose #-Debug
 
 
 ### TEST ###
-Set-Metadata -MetadataPath $MetadataPath -Verbose
+#Set-Metadata -PackageName 'jdk180-112' -MetadataPath $MetadataPath -Verbose
