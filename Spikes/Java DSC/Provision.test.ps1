@@ -8,9 +8,10 @@
 #region Provision Module
 
 Set-Location -LiteralPath 'C:\NgrAdmin\GitHub\AzureAdmin\Spikes\Java DSC'
-Import-Module -Name ".\Provision.psm1" -Verbose -Debug
+Import-Module -Name ".\Provision.psm1" -Verbose #-Debug
 
-$NodeDefinition = Get-NodeDefinition -DefinitionFile 'jdk180-112.1.json'
+[PSObject]$NodeDefinition = Get-NodeDefinition -DefinitionFile 'BUILD42.json' -Verbose
+
 
 [string]$InstallSetSource = 'http://dsl/content/repositories/Installers/Java/jdk1.8.0_112-CE.zip'  # -> json file
 [string]$InstallSetDestination = 'C:\temp\jdk180-112.1\jdk1.8.0_112-CE.zip'  # -> json file
@@ -18,7 +19,7 @@ Get-InstallSet -SourceFile $InstallSetSource -DestinationFile $InstallSetDestina
 
 Set-Metadata -LocalPath 'C:\temp\'
 
-Remove-Module -Name Provision -Verbose -Debug
+Remove-Module -Name Provision -Verbose #-Debug
 
 #endregion Provision Module
 
@@ -28,3 +29,10 @@ Remove-Module -Name Provision -Verbose -Debug
 .\Provision.ps1 -PackageName ''
 
 #endregion Provision Script
+
+
+
+# JSON trial
+[PSObject]$NodeDef = (Get-Content 'BUILD42.json') -join "`n" | ConvertFrom-Json
+$NodeDef | fl
+$NodeDef.software | fl

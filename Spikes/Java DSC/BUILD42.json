@@ -1,0 +1,12 @@
+{
+  "software": [
+    {
+      "packageName": "jdk180-112.1",
+      "installsetPath": "http://dsl/content/repositories/Installers/Java/",
+      "installsetName": "jdk1.8.0_112-CE.zip",
+      "tempPath": "C:\\temp\\",
+      "installPath": "C:\\temp\\jdk120-112\\"
+    }
+  ],
+  "metadataPath": "C:\\temp\\PFA_CMDB\\"
+}
