@@ -14,13 +14,13 @@ Set-StrictMode -Version Latest
 
 Import-Module -Name "$PSScriptRoot\Provision.psm1" -Verbose -Debug
 
+[string]$NodeDefinitionFile = 'BUILD42.json'  # -> script parameter
 
-[string]$PackageName = 'jdk180-112.1'  # -> script parameter
-
-[string]$InstallSetPath = 'http://dsl/content/repositories/Installers/Java/'  # -> json
-[string]$InstallSetName = 'jdk1.8.0_112-CE.zip'  # -> json
-[string]$TempFolder = 'C:\temp\'  # -> json
-[string]$MetadataPath = 'F:\PFA_CMDB' # -> json-file
+#[string]$PackageName = 'jdk180-112.1'  # -> json
+#[string]$InstallSetPath = 'http://dsl/content/repositories/Installers/Java/'  # -> json
+#[string]$InstallSetName = 'jdk1.8.0_112-CE.zip'  # -> json
+#[string]$TempFolder = 'C:\temp\'  # -> json
+#[string]$MetadataPath = 'F:\PFA_CMDB' # -> json-file
 
 
 Configuration InstallDsc {

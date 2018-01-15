@@ -40,10 +40,10 @@ Process {
 	return $null
 
 	if (Test-Path -LiteralPath '$DefinitionFile') {
-		$NodeDefinition = (Get-Content $DefinitionFile) -join "`n" | ConvertFrom-Json
+		$script:NodeDefinition = (Get-Content $DefinitionFile) -join "`n" | ConvertFrom-Json
 	}
 	else {
-		throw ("{0:s}Z  The package definition file '$DefinitionFile' does not exist." -f [System.DateTime]::UtcNow)
+		throw ("{0:s}Z  The node definition file '$DefinitionFile' does not exist." -f [System.DateTime]::UtcNow)
 	}
 }
 
