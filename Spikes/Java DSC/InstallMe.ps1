@@ -112,12 +112,11 @@ Process {
     throw ("{0:s}Z  DSC configuration failed. DSC MOF file = '.\InstallJava'. Check DSC log." -f [System.DateTime]::UtcNow)
   }
 
-  # Delete local Install Set ZIP-file - delete in DSC fails as the file is in use...
+  'Delete local Install Set ZIP-file - delete in DSC fails as the file is in use...' | Write-Verbose
   # ToDo : Test for file in use
   Start-Sleep -Seconds 5
   Remove-Item -LiteralPath ($TempFolder + $PackageName) -Recurse -Force
 
-  # Create local metadata
   Set-Metadata -PackageName $PackageName -MetadataPath $MetadataPath
 }
 
