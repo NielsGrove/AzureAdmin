@@ -88,19 +88,21 @@ Process {
     $NewTempFolder = New-Item -Path $TempFolder -Name $PackageName -ItemType directory
     "Temp folder '$NewTempFolder' created." | Write-Verbose
   }
-  [string]$DestinationFile = $TempFolder + $PackageName + '\' + $InstallSetName
+  [string]$LocalZipFile = $TempFolder + $PackageName + '\' + $InstallSetName
   try {
-    Start-BitsTransfer -Source $SourceFile -Destination $DestinationFile
+    Start-BitsTransfer -Source $SourceFile -Destination $LocalZipFile
   }
   catch {
     $Error[0] | Write-Error
     throw ("{0:s}Z  Could not copy installation file '$InstallSetName' from DSL." -f [System.DateTime]::UtcNow)
   }
 
-  Set-Location $PSScriptRoot
+  Expand-Archive -LiteralPath $LocalZipFile -DestinationPath $TempFolder
+
+  <#Set-Location $PSScriptRoot
 
   'Compile to MOF file...' | Write-Verbose
-  $MofFile = InstallJava -ZipFileName $DestinationFile -DestinationFolder $TempFolder
+  $MofFile = InstallJava -ZipFileName $LocalZipFile -DestinationFolder $TempFolder
   "MOF file = '$MofFile'" | Write-Verbose
 
   'Apply DSC-configuration...' | Write-Verbose
@@ -110,12 +112,10 @@ Process {
   catch {
     $Error[0] | Write-Error
     throw ("{0:s}Z  DSC configuration failed. DSC MOF file = '.\InstallJava'. Check DSC log." -f [System.DateTime]::UtcNow)
-  }
+  }#>
 
   'Delete local Install Set ZIP-file - delete in DSC fails as the file is in use...' | Write-Verbose
-  # ToDo : Test for file in use
-  Start-Sleep -Seconds 5
-  Remove-Item -LiteralPath ($TempFolder + $PackageName) -Recurse -Force
+  Remove-Zip -ZipFolder ($TempFolder + $PackageName)
 
   Set-Metadata -PackageName $PackageName -MetadataPath $MetadataPath
 }
@@ -126,6 +126,41 @@ End {
   "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
 }
 }  # Install-Java()
+
+
+function Remove-Zip {
+[CmdletBinding()]
+[OutputType([void])]
+Param(
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$ZipFolder
+)
+
+Begin {
+  $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
+  "{0:s}Z  ::  Remove-Zip()" -f [System.DateTime]::UtcNow | Write-Verbose
+}
+
+Process {
+  [int]$RetryCount = 0
+  Do {
+    'Waiting to delete zip-file...' | Write-Verbose
+    Start-Sleep -Seconds 5
+    "Retry count = $RetryCount" | Write-Verbose
+    Remove-Item -LiteralPath $ZipFolder -Recurse -Force
+  } While ((Test-Path -Path $ZipFolder) -and ++$RetryCount -le 5)
+
+  if (Test-Path -Path $ZipFolder) {
+    "{0:s}Z  Failed to delete zip-file" -f [System.DateTime]::UtcNow | Write-Error
+  }
+}
+
+End {
+  $mywatch.Stop()
+  [string]$Message = "Remove-Zip finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
+  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
+}
+}  # Remove-Zip()
 
 #endregion Java
 
@@ -215,8 +250,10 @@ Clear-Host
 [string]$TempFolder = 'C:\temp\'
 [String]$InstallPath = 'C:\temp\'
 [string]$MetadataPath = 'C:\temp\PFA_CMDB\'
-Install-Java -TempFolder $TempFolder -InstallPath $InstallPath -MetadataPath $MetadataPath #-Verbose #-Debug
+Install-Java -TempFolder $TempFolder -InstallPath $InstallPath -MetadataPath $MetadataPath -Verbose #-Debug
 
 
 ### TEST ###
+[string]$_ZipFile = 'C:\temp\jdk180-112\jdk1.8.0_112-CE.zip'
 #Set-Metadata -PackageName 'jdk180-112' -MetadataPath $MetadataPath -Verbose
+#Remove-ZipFile -ZipFile $_ZipFile -Verbose #-Debug
