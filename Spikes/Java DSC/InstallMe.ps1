@@ -26,6 +26,9 @@ Configuration InstallJava {
 [CmdletBinding()]
 Param(
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$PackageName,
+  
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
   [string]$ZipFileName,
   
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
@@ -34,14 +37,26 @@ Param(
 
   Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
 
-	Node 'localhost' {
-		Archive InstallSetUnzip {
-			Ensure = 'Present'
-			Path = $ZipFileName
-			Destination = $DestinationFolder
-			Force = $true
-		}
-	}
+    Node 'localhost' {
+      Script ExpandZip {
+        GetScript = {
+          '...'
+        }
+        SetScript = {
+          Expand-Archive -LiteralPath ($Using:ZipFileName) -DestinationPath ($Using:DestinationFolder) -Force #-Verbose #-Debug
+        }
+        TestScript = {
+          $TargetFolderName = $
+          Test-Path ($Using:DestinationFolder + 'jdk1.8.0_112-CE')
+        }
+      }
+      <#Archive InstallSetUnzip {
+		Ensure = 'Present'
+		Path = $ZipFileName
+		Destination = $DestinationFolder
+		Force = $true
+      }#>
+  }
 }  # InstallJava
 
 function Install-Java {
@@ -97,9 +112,9 @@ Process {
     throw ("{0:s}Z  Could not copy installation file '$InstallSetName' from DSL." -f [System.DateTime]::UtcNow)
   }
 
-  Expand-Archive -LiteralPath $LocalZipFile -DestinationPath $TempFolder
+  #Expand-Archive -LiteralPath $LocalZipFile -DestinationPath $TempFolder
 
-  <#Set-Location $PSScriptRoot
+  Set-Location $PSScriptRoot
 
   'Compile to MOF file...' | Write-Verbose
   $MofFile = InstallJava -ZipFileName $LocalZipFile -DestinationFolder $TempFolder
@@ -112,10 +127,10 @@ Process {
   catch {
     $Error[0] | Write-Error
     throw ("{0:s}Z  DSC configuration failed. DSC MOF file = '.\InstallJava'. Check DSC log." -f [System.DateTime]::UtcNow)
-  }#>
+  }
 
   'Delete local Install Set ZIP-file - delete in DSC fails as the file is in use...' | Write-Verbose
-  Remove-Zip -ZipFolder ($TempFolder + $PackageName)
+  #Remove-Zip -ZipFolder ($TempFolder + $PackageName)
 
   Set-Metadata -PackageName $PackageName -MetadataPath $MetadataPath
 }
