@@ -29,6 +29,12 @@ Param(
   [string]$PackageName,
   
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$TempFolder,
+  
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [string]$InstallPath,
+  
+  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
   [string]$ZipFileName,
   
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
@@ -37,25 +43,27 @@ Param(
 
   Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
 
-    Node 'localhost' {
-      Script ExpandZip {
-        GetScript = {
-          '...'
-        }
-        SetScript = {
-          Expand-Archive -LiteralPath ($Using:ZipFileName) -DestinationPath ($Using:DestinationFolder) -Force #-Verbose #-Debug
-        }
-        TestScript = {
-          $TargetFolderName = $
-          Test-Path ($Using:DestinationFolder + 'jdk1.8.0_112-CE')
-        }
+  Node 'localhost' {
+    Script TransferZip {
+      GetScript = { '...' }
+      SetScript = {
       }
-      <#Archive InstallSetUnzip {
-		Ensure = 'Present'
-		Path = $ZipFileName
-		Destination = $DestinationFolder
-		Force = $true
-      }#>
+      TestScript = {
+      }
+    }
+    Script ExpandZip {
+      GetScript = {
+        '...'
+      }
+      SetScript = {
+        Expand-Archive -LiteralPath ($Using:ZipFileName) -DestinationPath ($Using:DestinationFolder) -Force #-Verbose #-Debug
+      }
+      TestScript = {
+        #$TargetFolderName = $
+        Test-Path ($Using:DestinationFolder + 'jdk1.8.0_112-CE')
+      }
+      DependsOn = "[Script]TransferZip"
+    }
   }
 }  # InstallJava
 
@@ -117,7 +125,7 @@ Process {
   Set-Location $PSScriptRoot
 
   'Compile to MOF file...' | Write-Verbose
-  $MofFile = InstallJava -ZipFileName $LocalZipFile -DestinationFolder $TempFolder
+  $MofFile = InstallJava -PackageName $PackageName -ZipFileName $LocalZipFile -DestinationFolder $TempFolder
   "MOF file = '$MofFile'" | Write-Verbose
 
   'Apply DSC-configuration...' | Write-Verbose
