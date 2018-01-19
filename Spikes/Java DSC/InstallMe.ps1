@@ -38,6 +38,12 @@ Param(
       Type = "Directory"
     }
 
+    #ToDo : Log
+    <# PSDesiredStateConfiguration\Node : A Using variable cannot be retrieved. A Using variable can be used only with Invoke-Command, Start-Job, or InlineScript in the script workflow.
+    Log Log_PkgTmpFolder {
+      Message = "Package tomporary local folder '" + ($Using:Package).PackageTempFolder + "' created with succes."
+    }#>
+
     Script TransferZip {
       GetScript = { '...' }
       SetScript = {
@@ -51,6 +57,8 @@ Param(
       }
       DependsOn = "[File]PkgTmpFolder"
     }
+
+    #ToDo : Log
 
     Script ExpandZip {
       GetScript = { 
@@ -73,6 +81,8 @@ Param(
       DependsOn = "[Script]TransferZip"
     }
 
+    #ToDo : Log
+
     Script RemoveZip {
       GetScript = { '...' }
       SetScript = {
@@ -83,6 +93,8 @@ Param(
       }
       DependsOn = "[Script]ExpandZip"
     }
+
+    #ToDo : Log
   }
 }  # InstallJava
 
@@ -105,12 +117,15 @@ function Install-Java {
 [OutputType([void])]
 Param(
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  #ToDo : check last '\' in string (and folder exists ?)
   [string]$TempFolder,
 
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  #ToDo : Check path...
   [string]$InstallRootPath,
 
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  #ToDo : Check path...
   [string]$MetadataPath
 )
 
@@ -134,7 +149,7 @@ Process {
 
   'Compile to MOF file...' | Write-Verbose
   $MofFile = InstallJava -Package $Package
-  "MOF file = '$($MofFile.FullName)'" | Write-Verbose
+  #"MOF file = '$($MofFile.FullName)'" | Write-Verbose
 
   'Apply DSC-configuration...' | Write-Verbose
   try {
