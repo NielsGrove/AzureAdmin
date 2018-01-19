@@ -26,19 +26,7 @@ Configuration InstallJava {
 [CmdletBinding()]
 Param(
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$PackageName,
-  
-  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$TempFolder,
-  
-  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$InstallPath,
-  
-  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$ZipFileName,
-  
-  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$DestinationFolder
+  [PSObject]$Package
 )
 
   Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
@@ -47,20 +35,27 @@ Param(
     Script TransferZip {
       GetScript = { '...' }
       SetScript = {
+        [string]$SourceFile = ($Using:Package).InstallSetPath + ($Using:Package).InstallSetName
+        [string]$LocalZipFile = ($Using:Package).TempFolder + ($Using:Package).PackageName + '\' + ($Using:Package).InstallSetName
+        Start-BitsTransfer -Source $SourceFile -Destination $LocalZipFile
       }
       TestScript = {
+        [string]$LocalZipFile = ($Using:Package).TempFolder + ($Using:Package).PackageName + '\' + ($Using:Package).InstallSetName
+        Test-Path $LocalZipFile
       }
     }
     Script ExpandZip {
-      GetScript = {
-        '...'
-      }
+      GetScript = { '...' }
       SetScript = {
-        Expand-Archive -LiteralPath ($Using:ZipFileName) -DestinationPath ($Using:DestinationFolder) -Force #-Verbose #-Debug
+        [string]$LocalZipFile = ($Using:Package).TempFolder + ($Using:Package).PackageName + '\' + ($Using:Package).InstallSetName
+        Expand-Archive -LiteralPath ($LocalZipFile) -DestinationPath ($Using:DestinationFolder) -Force #-Verbose #-Debug
       }
       TestScript = {
-        #$TargetFolderName = $
-        Test-Path ($Using:DestinationFolder + 'jdk1.8.0_112-CE')
+        [string[]]$Split = ($Using:InstallSetName).Split('.')
+        [int]$ExtensionLength = 1 + $Split[$Split.Count-1].Length  # one '.' plus element length (e.g. 'zip')
+        [string]$ExpandResultFolder = $InstallSetName -replace ".{$ExtensionLength}$"
+        
+        Test-Path ($Using:DestinationFolder + $ExpandResultFolder)
       }
       DependsOn = "[Script]TransferZip"
     }
@@ -99,33 +94,43 @@ Begin {
   $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
   "{0:s}Z  ::  Install-Java()" -f [System.DateTime]::UtcNow | Write-Verbose
 
-  [string]$PackageName = 'jdk180-112'
-  [string]$InstallSetPath = 'http://dsl/content/repositories/Installers/Java/'
-  [string]$InstallSetName = 'jdk1.8.0_112-CE.zip'
+  'Create custom object holding package metadata...' | Write-Verbose
+  [PSObject]$Package = New-Object -TypeName PSObject
+  $Package | Add-Member -MemberType NoteProperty -Name PackageName -Value 'jdk180-112'
+  $Package | Add-Member -MemberType NoteProperty -Name InstallSetName -Value 'jdk1.8.0_112-CE.zip'
+  $Package | Add-Member -MemberType NoteProperty -Name InstallSetPath -Value 'http://dsl/content/repositories/Installers/Java/'
+  $Package | Add-Member -MemberType NoteProperty -Name InstallPath -Value $InstallPath
+  $Package | Add-Member -MemberType NoteProperty -Name TempFolder -Value $TempFolder
+  $Package.PSObject.TypeNames.Insert(0, 'DevOps.Package')
+
+
+  #[string]$PackageName = 'jdk180-112'
+  #[string]$InstallSetPath = 'http://dsl/content/repositories/Installers/Java/'
+  #[string]$InstallSetName = 'jdk1.8.0_112-CE.zip'
 }
 
 Process {
-  'Copy install set file from DSL to local folder...' | Write-Verbose
-  [string]$SourceFile = $InstallSetPath + $InstallSetName
-  if (-not (Test-Path ($TempFolder + $PackageName))) {
-    $NewTempFolder = New-Item -Path $TempFolder -Name $PackageName -ItemType directory
+  'Create local temp package folder...' | Write-Verbose
+  [string]$SourceFile = $Package.InstallSetPath + $Package.InstallSetName
+  if (-not (Test-Path ($Package.TempFolder + $Package.PackageName))) {
+    $NewTempFolder = New-Item -Path $Package.TempFolder -Name $Package.PackageName -ItemType directory
     "Temp folder '$NewTempFolder' created." | Write-Verbose
   }
-  [string]$LocalZipFile = $TempFolder + $PackageName + '\' + $InstallSetName
+  <#[string]$LocalZipFile = $TempFolder + $PackageName + '\' + $InstallSetName
   try {
     Start-BitsTransfer -Source $SourceFile -Destination $LocalZipFile
   }
   catch {
     $Error[0] | Write-Error
     throw ("{0:s}Z  Could not copy installation file '$InstallSetName' from DSL." -f [System.DateTime]::UtcNow)
-  }
+  }#>
 
   #Expand-Archive -LiteralPath $LocalZipFile -DestinationPath $TempFolder
 
   Set-Location $PSScriptRoot
 
   'Compile to MOF file...' | Write-Verbose
-  $MofFile = InstallJava -PackageName $PackageName -ZipFileName $LocalZipFile -DestinationFolder $TempFolder
+  $MofFile = InstallJava -Package $Package
   "MOF file = '$MofFile'" | Write-Verbose
 
   'Apply DSC-configuration...' | Write-Verbose
@@ -140,7 +145,7 @@ Process {
   'Delete local Install Set ZIP-file - delete in DSC fails as the file is in use...' | Write-Verbose
   #Remove-Zip -ZipFolder ($TempFolder + $PackageName)
 
-  Set-Metadata -PackageName $PackageName -MetadataPath $MetadataPath
+  Set-Metadata -PackageName $Package.PackageName -MetadataPath $MetadataPath
 }
 
 End {
@@ -277,6 +282,6 @@ Install-Java -TempFolder $TempFolder -InstallPath $InstallPath -MetadataPath $Me
 
 
 ### TEST ###
-[string]$_ZipFile = 'C:\temp\jdk180-112\jdk1.8.0_112-CE.zip'
+#[string]$_ZipFile = 'C:\temp\jdk180-112\jdk1.8.0_112-CE.zip'
 #Set-Metadata -PackageName 'jdk180-112' -MetadataPath $MetadataPath -Verbose
 #Remove-ZipFile -ZipFile $_ZipFile -Verbose #-Debug
