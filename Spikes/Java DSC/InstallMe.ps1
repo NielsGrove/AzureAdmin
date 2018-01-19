@@ -48,14 +48,17 @@ Param(
       GetScript = { '...' }
       SetScript = {
         [string]$LocalZipFile = ($Using:Package).TempFolder + ($Using:Package).PackageName + '\' + ($Using:Package).InstallSetName
-        Expand-Archive -LiteralPath ($LocalZipFile) -DestinationPath ($Using:DestinationFolder) -Force #-Verbose #-Debug
+        "Local zip file = '$LocalZipFile'" | Write-Verbose
+        "Destination path = '$($Using:Package)'"
+        Expand-Archive -LiteralPath ($LocalZipFile) -DestinationPath ($Using:InstallRootPath) -Force #-Verbose #-Debug
       }
       TestScript = {
-        [string[]]$Split = ($Using:InstallSetName).Split('.')
+        [string[]]$Split = (($Using:Package).InstallSetName).Split('.')
         [int]$ExtensionLength = 1 + $Split[$Split.Count-1].Length  # one '.' plus element length (e.g. 'zip')
-        [string]$ExpandResultFolder = $InstallSetName -replace ".{$ExtensionLength}$"
+        [string]$ExpandResultFolder = ($Using:Package).InstallSetName -replace ".{$ExtensionLength}$"
+        "Result folder name = '$ExpandResultFolder'" | Write-Verbose
         
-        Test-Path ($Using:DestinationFolder + $ExpandResultFolder)
+        Test-Path (($Using:Package).InstallRootPath + $ExpandResultFolder)
       }
       DependsOn = "[Script]TransferZip"
     }
@@ -84,7 +87,7 @@ Param(
   [string]$TempFolder,
 
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$InstallPath,
+  [string]$InstallRootPath,
 
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
   [string]$MetadataPath
@@ -99,33 +102,19 @@ Begin {
   $Package | Add-Member -MemberType NoteProperty -Name PackageName -Value 'jdk180-112'
   $Package | Add-Member -MemberType NoteProperty -Name InstallSetName -Value 'jdk1.8.0_112-CE.zip'
   $Package | Add-Member -MemberType NoteProperty -Name InstallSetPath -Value 'http://dsl/content/repositories/Installers/Java/'
-  $Package | Add-Member -MemberType NoteProperty -Name InstallPath -Value $InstallPath
+  $Package | Add-Member -MemberType NoteProperty -Name InstallRootPath -Value $InstallRootPath
   $Package | Add-Member -MemberType NoteProperty -Name TempFolder -Value $TempFolder
+  $Package | Add-Member -MemberType NoteProperty -TypeName string -Name PackageTempFolder -Value $null
   $Package.PSObject.TypeNames.Insert(0, 'DevOps.Package')
-
-
-  #[string]$PackageName = 'jdk180-112'
-  #[string]$InstallSetPath = 'http://dsl/content/repositories/Installers/Java/'
-  #[string]$InstallSetName = 'jdk1.8.0_112-CE.zip'
 }
 
 Process {
   'Create local temp package folder...' | Write-Verbose
-  [string]$SourceFile = $Package.InstallSetPath + $Package.InstallSetName
   if (-not (Test-Path ($Package.TempFolder + $Package.PackageName))) {
-    $NewTempFolder = New-Item -Path $Package.TempFolder -Name $Package.PackageName -ItemType directory
-    "Temp folder '$NewTempFolder' created." | Write-Verbose
+    $_PkgTempFolder = New-Item -Path $Package.TempFolder -Name $Package.PackageName -ItemType directory
+    $Package.PackageTempFolder = $_PkgTempFolder.FullName
+    "Temp folder '$($Package.PackageTempFolder)' created." | Write-Verbose
   }
-  <#[string]$LocalZipFile = $TempFolder + $PackageName + '\' + $InstallSetName
-  try {
-    Start-BitsTransfer -Source $SourceFile -Destination $LocalZipFile
-  }
-  catch {
-    $Error[0] | Write-Error
-    throw ("{0:s}Z  Could not copy installation file '$InstallSetName' from DSL." -f [System.DateTime]::UtcNow)
-  }#>
-
-  #Expand-Archive -LiteralPath $LocalZipFile -DestinationPath $TempFolder
 
   Set-Location $PSScriptRoot
 
@@ -202,7 +191,7 @@ function Set-Metadata {
 .PARAMETER PackageName
   Name of software package that the metadata belong to.
 .PARAMETER MetadataPath
-  Local path for metadata, e.g. "F:\PFA_CMDB"
+  Local path for metadata, e.g. "D:\DevOps_CMDB"
 .OUTPUTS
   (none)
 .NOTES
@@ -276,9 +265,9 @@ End {
 Clear-Host
 
 [string]$TempFolder = 'C:\temp\'
-[String]$InstallPath = 'C:\temp\'
+[String]$InstallRootPath = 'C:\temp\'
 [string]$MetadataPath = 'C:\temp\PFA_CMDB\'
-Install-Java -TempFolder $TempFolder -InstallPath $InstallPath -MetadataPath $MetadataPath -Verbose #-Debug
+Install-Java -TempFolder $TempFolder -InstallRootPath $InstallRootPath -MetadataPath $MetadataPath -Verbose #-Debug
 
 
 ### TEST ###
