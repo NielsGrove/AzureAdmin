@@ -32,6 +32,12 @@ Param(
   Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
 
   Node 'localhost' {
+    File PkgTmpFolder {
+      DestinationPath = ($Package.PackageTempFolder)
+      Ensure = "Present"
+      Type = "Directory"
+    }
+
     Script TransferZip {
       GetScript = { '...' }
       SetScript = {
@@ -43,14 +49,18 @@ Param(
         [string]$LocalZipFile = ($Using:Package).TempFolder + ($Using:Package).PackageName + '\' + ($Using:Package).InstallSetName
         Test-Path $LocalZipFile
       }
+      DependsOn = "[File]PkgTmpFolder"
     }
+
     Script ExpandZip {
-      GetScript = { '...' }
+      GetScript = { 
+        @{ Result = ( Get-Content -LiteralPath ($Using:Package).InstallRootPath ) }
+      }
       SetScript = {
         [string]$LocalZipFile = ($Using:Package).TempFolder + ($Using:Package).PackageName + '\' + ($Using:Package).InstallSetName
         "Local zip file = '$LocalZipFile'" | Write-Verbose
         "Destination path = '$($Using:Package)'"
-        Expand-Archive -LiteralPath ($LocalZipFile) -DestinationPath ($Using:InstallRootPath) -Force #-Verbose #-Debug
+        Expand-Archive -LiteralPath ($LocalZipFile) -DestinationPath (($Using:Package).InstallRootPath) -Force #-Verbose #-Debug
       }
       TestScript = {
         [string[]]$Split = (($Using:Package).InstallSetName).Split('.')
@@ -61,6 +71,17 @@ Param(
         Test-Path (($Using:Package).InstallRootPath + $ExpandResultFolder)
       }
       DependsOn = "[Script]TransferZip"
+    }
+
+    Script RemoveZip {
+      GetScript = { '...' }
+      SetScript = {
+        Remove-Item -LiteralPath (($Using:Package).PackageTempFolder) -Recurse -Force
+      }
+      TestScript = {
+        -not (Test-Path ($Using:Package).PackageTempFolder)
+      }
+      DependsOn = "[Script]ExpandZip"
     }
   }
 }  # InstallJava
@@ -104,23 +125,16 @@ Begin {
   $Package | Add-Member -MemberType NoteProperty -Name InstallSetPath -Value 'http://dsl/content/repositories/Installers/Java/'
   $Package | Add-Member -MemberType NoteProperty -Name InstallRootPath -Value $InstallRootPath
   $Package | Add-Member -MemberType NoteProperty -Name TempFolder -Value $TempFolder
-  $Package | Add-Member -MemberType NoteProperty -TypeName string -Name PackageTempFolder -Value $null
+  $Package | Add-Member -MemberType NoteProperty -TypeName string -Name PackageTempFolder -Value ($Package.TempFolder + $Package.PackageName)
   $Package.PSObject.TypeNames.Insert(0, 'DevOps.Package')
 }
 
 Process {
-  'Create local temp package folder...' | Write-Verbose
-  if (-not (Test-Path ($Package.TempFolder + $Package.PackageName))) {
-    $_PkgTempFolder = New-Item -Path $Package.TempFolder -Name $Package.PackageName -ItemType directory
-    $Package.PackageTempFolder = $_PkgTempFolder.FullName
-    "Temp folder '$($Package.PackageTempFolder)' created." | Write-Verbose
-  }
-
   Set-Location $PSScriptRoot
 
   'Compile to MOF file...' | Write-Verbose
   $MofFile = InstallJava -Package $Package
-  "MOF file = '$MofFile'" | Write-Verbose
+  "MOF file = '$($MofFile.FullName)'" | Write-Verbose
 
   'Apply DSC-configuration...' | Write-Verbose
   try {
@@ -128,11 +142,8 @@ Process {
   }
   catch {
     $Error[0] | Write-Error
-    throw ("{0:s}Z  DSC configuration failed. DSC MOF file = '.\InstallJava'. Check DSC log." -f [System.DateTime]::UtcNow)
+    throw ("{0:s}Z  DSC configuration failed. DSC MOF file = '$($MofFile.FullName)'. Check DSC log." -f [System.DateTime]::UtcNow)
   }
-
-  'Delete local Install Set ZIP-file - delete in DSC fails as the file is in use...' | Write-Verbose
-  #Remove-Zip -ZipFolder ($TempFolder + $PackageName)
 
   Set-Metadata -PackageName $Package.PackageName -MetadataPath $MetadataPath
 }
@@ -143,41 +154,6 @@ End {
   "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
 }
 }  # Install-Java()
-
-
-function Remove-Zip {
-[CmdletBinding()]
-[OutputType([void])]
-Param(
-  [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$ZipFolder
-)
-
-Begin {
-  $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
-  "{0:s}Z  ::  Remove-Zip()" -f [System.DateTime]::UtcNow | Write-Verbose
-}
-
-Process {
-  [int]$RetryCount = 0
-  Do {
-    'Waiting to delete zip-file...' | Write-Verbose
-    Start-Sleep -Seconds 5
-    "Retry count = $RetryCount" | Write-Verbose
-    Remove-Item -LiteralPath $ZipFolder -Recurse -Force
-  } While ((Test-Path -Path $ZipFolder) -and ++$RetryCount -le 5)
-
-  if (Test-Path -Path $ZipFolder) {
-    "{0:s}Z  Failed to delete zip-file" -f [System.DateTime]::UtcNow | Write-Error
-  }
-}
-
-End {
-  $mywatch.Stop()
-  [string]$Message = "Remove-Zip finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
-  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
-}
-}  # Remove-Zip()
 
 #endregion Java
 
