@@ -39,6 +39,7 @@ function Install-Tfs {
 [OutputType([void])]
 Param(
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
+  [ValidateSet('ApplicationTier', 'Database', 'CodeSearch', 'Reporting', IgnoreCase=$false)]  # Later also 'Reports' and 'Analysis'. Maybe also 'ReportsDatabase'.
   [string]$ServerRole
 )
 
@@ -52,8 +53,8 @@ Process {
 
 End {
   $mywatch.Stop()
-  [string]$Message = "<function name> finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
-  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
+  [string]$Message = "Install-Tfs finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
+  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Verbose
 }
 }  # Install-Tfs()
 

@@ -15,6 +15,7 @@
 #Requires -Version 6
 Set-StrictMode -Version Latest
 
+if ( (Get-Module -Name TfsInstall) -ne $null ) { Remove-Module -Name TfsInstall -ErrorAction Stop }
 Import-Module $PSScriptRoot\TfsInstall.psm1
 
 
@@ -37,16 +38,16 @@ function Start-TfsInstaller {
 [OutputType([void])]
 Param(
   [Parameter(Mandatory=$true, ValueFromPipeLine=$true,HelpMessage='Take your time to write a good help message...')]
-  [string]$ServerRole
+  [string]$TfsServerRole
 )
 
 Begin {
   $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
-  "{0:s}Z  ::  Start-TfsInstaller( '$ServerRole' )" -f [System.DateTime]::UtcNow | Write-Verbose
+  "{0:s}Z  ::  Start-TfsInstaller( '$TfsServerRole' )" -f [System.DateTime]::UtcNow | Write-Verbose
 }
 
 Process {
-  Install-Tfs -ServerRole 'ApplicatioTier'
+  Install-Tfs -ServerRole $TfsServerRole
 }
 
 End {
@@ -62,4 +63,7 @@ End {
 ###  INVOKE  ###
 
 Clear-Host
-Start-TfsInstaller -Verbose #-Debug
+Start-TfsInstaller -TfsServerRole 'ApplicationTier' -Verbose #-Debug
+Start-TfsInstaller -TfsServerRole 'Database' -Verbose #-Debug
+Start-TfsInstaller -TfsServerRole 'CodeSearch' -Verbose #-Debug
+Start-TfsInstaller -TfsServerRole 'Reporting' -Verbose #-Debug
