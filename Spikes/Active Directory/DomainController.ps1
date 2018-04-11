@@ -2,7 +2,7 @@
 .DESCRIPTION
   Create Active Directory (AD) Domain Controller (DC) with new domain in new forrest.
 
-  Windows Server 2016 Core
+  Windows Server 2016 Core (1709)
 .LINK
   How to build a server 2016 domain controller (Non-GUI) and make it secure
   (https://medium.com/@rootsecdev/how-to-build-a-server-2016-domain-controller-non-gui-and-make-it-secure-4e784b393bac)
