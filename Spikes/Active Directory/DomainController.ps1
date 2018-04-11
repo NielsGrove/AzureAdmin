@@ -27,6 +27,8 @@
 # Create Domain Controller
 Get-WindowsFeature AD-Domain-Services | Install-WindowsFeature
 
+# ToDo: Alternative placement of NTDS files, e.g D-drive
+
 Import-Module ADDSDeployment 
 Install-ADDSForest
 # ignore warnings...
