@@ -40,7 +40,7 @@ Process {
   else
   { throw "Could not stop TFS Code Search service. Return value = '$($Return.ReturnValue)'. Check documentation on StopService method of the WMI Win32_Service class." }
 
-  'Delete TFS Code Search...' | Write-Verbose
+  'Delete TFS Code Search service...' | Write-Verbose
   $Return = $CodeSearchSvc.Delete()
   if ($Return.ReturnValue -eq 16)
   { '  The service is being removed from the system.' | Write-Verbose }
@@ -49,6 +49,8 @@ Process {
 
   'Delete files for TFS Code Search...' | Write-Verbose
   Remove-Item -Path 'C:\TfsData\Search' -Recurse -Force
+
+  'Uninstall Java manually. Remember to remove Windows environment variable JAVA_HOME.' | Write-Verbose
 }
 
 End {}
