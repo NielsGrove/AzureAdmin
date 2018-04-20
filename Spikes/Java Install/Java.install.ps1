@@ -54,19 +54,25 @@ function Set-JavaEnvironment {
   }
   
   Process {
-    'Create Windows environment variable JAVA_HOME as system variable...'
+    'Create Windows environment variable JAVA_HOME as system variable...' | Write-Verbose
     # ToDo : Test if environment variable does exist
     [System.Environment]::SetEnvironmentVariable('JAVA_HOME', $JavaPath.FullName, 'Machine')  #[System.EnvironmentVariableTarget]::Machine
     
-    'Test JAVA_HOME...'
-        Get-Item -Path env:JAVA_HOME  # execute in new PowerShell session
+    'Test environment variable JAVA_HOME...' | Write-Verbose
+    Test-Path -Path env:JAVA_HOMEfunction
+      
+    <#try {
+      $JavaHome = Get-Item -Path env:JAVA_HOME  # execute in new PowerShell session
+    }
+    catch {
+    }#>
     
-    'Add JAVA_HOME\bin to Windows environment variable PATH...'
+    'Add %JAVA_HOME%\bin to Windows environment variable PATH...' | Write-Verbose
     
-    'Test PATH...'
+    'Test PATH...' | Write-Verbose
     
-    'Test Java by version...'
-    & 'Java -version'
+    'Test Java by version...' | Write-Verbose
+    #& 'Java -version'
   }
   
   End {
@@ -82,7 +88,7 @@ ToDo: Script to remove Java configuration...
 
 ###  INVOKE  ###
 
-#Set-JavaEnvironment -JavaPath 'C:\DoesNotExist'
+#Set-JavaEnvironment -JavaPath 'C:\DoesNotExist' -Verbose
 
-Set-JavaEnvironment -JavaPath 'C:\Java\jdk1.8.0_112'
+Set-JavaEnvironment -JavaPath 'C:\Java\jdk1.8.0_112' -Verbose #-Debug
 
