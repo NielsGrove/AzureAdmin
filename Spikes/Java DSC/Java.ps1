@@ -14,7 +14,7 @@
 Configuration JavaDscConfiguration {
 Param()
 
-    Import-DscResource –ModuleName 'PSDesiredStateConfiguration'
+    Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
 
     Node 'localhost' {
         # Test if 7zip is installed
