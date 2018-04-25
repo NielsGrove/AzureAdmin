@@ -6,6 +6,9 @@
 .LINK
   How to build a server 2016 domain controller (Non-GUI) and make it secure
   (https://medium.com/@rootsecdev/how-to-build-a-server-2016-domain-controller-non-gui-and-make-it-secure-4e784b393bac)
+.LINK
+  Step-By-Step: Setting up Active Directory in Windows Server 2016
+  (https://blogs.technet.microsoft.com/canitpro/2017/02/22/step-by-step-setting-up-active-directory-in-windows-server-2016/)
 #>
 
 #region Server
@@ -22,7 +25,7 @@
 
 
 #region Domain Controller
-# Start PowerShell: "powershell.exe"
+# Start PowerShell as Administrator: "powershell.exe"
 
 # Create Domain Controller
 Get-WindowsFeature AD-Domain-Services | Install-WindowsFeature
@@ -38,7 +41,7 @@ New-ADUser -Name 'SuperNiels' -GivenName '' -Surname '' -SamAccountName supernie
 Get-ADUser SuperNiels
 
 # Set password for Domain Admin user
-Set-ADAccountPassword ‘CN=SuperNiels,CN=users,DC=sqladmin,DC=lan’ -Reset -NewPassword (ConvertTo-SecureString -AsPlainText “P@ssword1234” -Force)
+Set-ADAccountPassword 'CN=SuperNiels,CN=users,DC=sqladmin,DC=lan' -Reset -NewPassword (ConvertTo-SecureString -AsPlainText 'P@ssword1234' -Force)
 Enable-ADAccount -Identity SuperNiels
 
 # Add user to Domain Admins
