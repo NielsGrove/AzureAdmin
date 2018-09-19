@@ -1,7 +1,6 @@
 <#
 .DESCRIPTION
 .PARAMETER <Parameter Name>
-.EXAMPLE
 .INPUTS
 .OUTPUTS
 .RETURNVALUE
@@ -22,7 +21,7 @@
 #Requires -Version 5
 Set-StrictMode -Version Latest
 
-#Import-Module G:\Script\Sandbox\Module.sandbox\Module.sandbox.psm1
+#Import-Module $PSScriptRoot\sandbox.psm1
 
 
 #region <name>
@@ -51,16 +50,17 @@ Param(
 
 Begin {
   $mywatch = [System.Diagnostics.Stopwatch]::StartNew()
-  "{0:s}Z  ::  <function name>( '$param1' )" -f [System.DateTime]::UtcNow | Write-Verbose
+  "[{0:s}Z  BEGIN  ]  <function name>( '$param1' )" -f [System.DateTime]::UtcNow | Write-Verbose
 }
 
 Process {
+  "[{0:s}Z  PROCESS]" -f [System.DateTime]::UtcNow | Write-Verbose
 }
 
 End {
   $mywatch.Stop()
   [string]$Message = "<function name> finished with success. Duration = $($mywatch.Elapsed.ToString()). [hh:mm:ss.ddd]"
-  "{0:s}Z  $Message" -f [System.DateTime]::UtcNow | Write-Output
+  "[{0:s}Z  END    ]  $Message" -f [System.DateTime]::UtcNow | Write-Output
 }
 }  # Verb-Noun()
 
@@ -68,6 +68,5 @@ End {
 
 
 ###  INVOKE  ###
-
 Clear-Host
-#<function call> -Verbose -Debug
+#<function call> -Verbose #-Debug
